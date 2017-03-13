@@ -29,12 +29,12 @@ try {
 
 // set up wiring
 wpi.setup('wpi');
-wpi.pinMode(CONFIG_PIN, wpi.OUTPUT);
+wpi.pinMode(config.LEDPin, wpi.OUTPUT);
 var messageProcessor = new MessageProcessor(config);
 
 // create a client
 // read out the connectionString from process environment
-var connectionString = process.ENV['Azure.IoTHub.ConenctionString']
+var connectionString = process.env['AzureIoTHubConnectionString'];
 var client = initClient(connectionString, config);
 
 client.open((err) => {
@@ -51,11 +51,13 @@ client.open((err) => {
   setInterval(sendMessage, config.interval);
 });
 
+var messageId = 0;
 function sendMessage() {
   if (!sendingMessage) { return; }
-  messageProcessor.getMessage((content) => {
+  messageId++;
+  messageProcessor.getMessage(messageId, (content) => {
     var message = new Message(content);
-    client.send(message, (err) => {
+    client.sendEvent(message, (err) => {
       if (err) {
         console.error('[IoT hub Client] Send message error: ' + err.message);
       } else {
@@ -95,7 +97,7 @@ function initClient(connectionStringParam, credentialPath) {
   var deviceId = connectionString.DeviceId;
 
   // fromConnectionString must specify a transport constructor, coming from any transport package.
-  this.client = Client.fromConnectionString(connectionStringParam, Protocol);
+  client = Client.fromConnectionString(connectionStringParam, Protocol);
 
   // Configure the client to use X509 authentication if required by the connection string.
   if (connectionString.x509) {
@@ -107,8 +109,9 @@ function initClient(connectionStringParam, credentialPath) {
       key: fs.readFileSync(path.join(credentialPath, deviceId + '-key.pem')).toString()
     };
 
-    this.client.setOptions(connectionOptions);
+    client.setOptions(connectionOptions);
 
     console.log('[Device] Using X.509 client certificate authentication');
   }
+  return client;
 }

@@ -7,12 +7,12 @@ const Bme280Sensor = require('./bme280Sensor.js');
 const SimulatedSensor = require('./simulatedSensor.js');
 
 function MessageProcessor(option) {
-  option = option.assign(option, {
+  option = Object.assign({
     deviceId: '[Unknown device] node'
-  });
+  }, option);
   this.sensor = option.simulatedData ? new SimulatedSensor() : new Bme280Sensor(option.i2cOption);
   this.deviceId = option.deviceId;
-  sensor.init(() => {
+  this.sensor.init(() => {
     this.inited = true;
   });
 }
@@ -25,12 +25,12 @@ MessageProcessor.prototype.getMessage = function (messageId, cb) {
       return;
     }
 
-    cb({
+    cb(JSON.stringify({
       messageId: messageId,
       deviceId: this.deviceId,
       temperature: data.temperature_C,
       humidity: data.humidity
-    });
+    }));
   });
 }
 

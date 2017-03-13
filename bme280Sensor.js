@@ -12,7 +12,7 @@ const DEFAULT_OPTIONS = {
 };
 
 function Sensor(options) {
-  options = Object.assign(options || {}, DEFAULT_OPTIONS);
+  options = Object.assign(DEFAULT_OPTIONS, options || {});
   this.bme280 = new BME280(options);
 }
 
