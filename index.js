@@ -68,12 +68,26 @@ function sendMessage() {
   });
 }
 
-function onStart() {
+function onStart(request, response) {
+  console.log('Receive direct method: ' + request.payload);
   sendingMessage = true;
+
+  response.send(200, 'Successully start sending message to cloud', function (err) {
+    if (err) {
+      console.error('[IoT hub Client] Failed sending a method response:\n' + err.message);
+    }
+  });
 }
 
-function onStop() {
+function onStop(request, response) {
+  console.log('Receive direct method: ' + request.payload);
   sendingMessage = false;
+
+  response.send(200, 'Successully stop sending message to cloud', function (err) {
+    if (err) {
+      console.error('[IoT hub Client] Failed sending a method response:\n' + err.message);
+    }
+  });
 }
 
 function receiveMessageCallback(msg) {
@@ -88,7 +102,7 @@ function blinkLED() {
   // Light up LED for 500 ms
   wpi.digitalWrite(config.LEDPin, 1);
   setTimeout(function () {
-  wpi.digitalWrite(config.LEDPin, 0);
+    wpi.digitalWrite(config.LEDPin, 0);
   }, 500);
 }
 
